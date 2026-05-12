@@ -415,6 +415,25 @@
     </div>
   </div>
 
+  <!-- Campo de nome -->
+  <div style="margin-bottom:14px;text-align:center">
+    <div style="font-size:7px;color:var(--neon-yellow);text-shadow:0 0 6px var(--neon-yellow);margin-bottom:8px;letter-spacing:2px">▶ SEU NOME</div>
+    <input id="player-name-input" type="text" maxlength="12" placeholder="SEU NOME" style="
+      font-family:'Press Start 2P',monospace;
+      font-size:11px;
+      width:200px;
+      padding:10px;
+      border:3px solid var(--neon-yellow);
+      background:#0a0800;
+      color:var(--neon-yellow);
+      text-align:center;
+      letter-spacing:2px;
+      outline:none;
+      text-transform:uppercase;
+      box-shadow:0 0 10px var(--neon-yellow);
+    ">
+  </div>
+
   <!-- Botões criar/entrar -->
   <div id="online-lobby-btns" style="display:flex;flex-direction:column;gap:12px;align-items:center">
     <button class="menu-btn yellow" onclick="createRoom()">⚔ CRIAR SALA</button>
@@ -1610,9 +1629,11 @@ function tryStartMusic() {
 const SERVER_URL = 'wss://chess-server-production-e65d.up.railway.app';
 
 let ws = null;
-let onlineColor = null; // 'white' or 'black'
+let onlineColor = null;
 let onlineRoom = null;
 let onlineConnected = false;
+let myPlayerName = 'JOGADOR';
+let opponentName = 'AMIGO';
 let pingInterval = null;
 
 function initOnlineScreen() {
@@ -1679,21 +1700,27 @@ function handleServerMessage(msg) {
     case 'joined':
       onlineColor = msg.color;
       onlineRoom = msg.code;
+      opponentName = msg.opponentName || 'AMIGO';
       document.getElementById('online-lobby-btns').style.display = 'none';
-      setOnlineStatus('Conectado! Aguardando o amigo...', 'var(--neon-green)');
+      setOnlineStatus(`Conectado! Aguardando ${opponentName} iniciar...`, 'var(--neon-green)');
       document.getElementById('online-waiting').style.display = 'block';
+      // Joining player goes straight to game after connecting
+      setTimeout(() => startOnlineGame(), 800);
       break;
 
     case 'opponent_joined':
+      opponentName = msg.name || 'AMIGO';
       document.getElementById('online-waiting').style.display = 'none';
       document.getElementById('online-lobby-btns').style.display = 'none';
       document.getElementById('online-room-code').style.display = 'none';
-      setOnlineStatus('Amigo conectado!', 'var(--neon-green)');
+      setOnlineStatus(`${opponentName} conectou!`, 'var(--neon-green)');
+      // Show ready box with opponent name
+      document.getElementById('online-ready-box').querySelector('div').innerHTML =
+        `${opponentName} ENTROU NA SALA!<br>VOCÊ ESTÁ PRONTO?`;
       document.getElementById('online-ready-box').style.display = 'block';
       break;
 
     case 'opponent_ready':
-      // Both players confirmed — start game
       startOnlineGame();
       break;
 
@@ -1718,29 +1745,37 @@ function handleServerMessage(msg) {
   }
 }
 
+function getPlayerName() {
+  const input = document.getElementById('player-name-input');
+  const name = input ? input.value.trim().toUpperCase() : '';
+  return name.length > 0 ? name : 'JOGADOR';
+}
+
 function createRoom() {
+  myPlayerName = getPlayerName();
   connectWS(() => {
-    ws.send(JSON.stringify({ type: 'create' }));
+    ws.send(JSON.stringify({ type: 'create', name: myPlayerName }));
   });
 }
 
 function joinRoom() {
   const code = document.getElementById('room-code-input').value.trim().toUpperCase();
-  if (code.length !== 4) {
-    showOnlineError('Digite o código de 4 dígitos!');
-    return;
-  }
+  if (code.length !== 4) { showOnlineError('Digite o código de 4 dígitos!'); return; }
+  myPlayerName = getPlayerName();
   connectWS(() => {
-    ws.send(JSON.stringify({ type: 'join', code }));
+    ws.send(JSON.stringify({ type: 'join', code, name: myPlayerName }));
   });
 }
 
 function startOnlineGame() {
   gameMode = 'online';
+  const isWhite = onlineColor === 'white';
   document.getElementById('game-mode-badge').textContent =
-    `🌐 ONLINE — VOCÊ É AS ${onlineColor === 'white' ? 'BRANCAS ♔' : 'PRETAS ♚'}`;
+    `🌐 ONLINE — VOCÊ É AS ${isWhite ? 'BRANCAS ♔' : 'PRETAS ♚'}`;
+  // Set player names in panels
+  document.querySelector('.player-name').textContent = isWhite ? myPlayerName : opponentName;
+  document.getElementById('p2-name').textContent = isWhite ? opponentName : myPlayerName;
   document.getElementById('p2-label').textContent = '🌐 ONLINE';
-  document.getElementById('p2-name').textContent = 'AMIGO';
   document.getElementById('coach-box').style.display = 'none';
   document.getElementById('last-move-box').style.display = 'block';
   document.getElementById('tips-feed-wrap').style.display = 'none';
