@@ -717,7 +717,7 @@ function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   if(name!=='game'){
-    clearInterval(timerInterval);
+    stopTimer();
     // Reset game mode when leaving game screen
     if(name==='menu'){
       gameMode='pvp';
@@ -1176,12 +1176,22 @@ function resetGame(){
   castlingRights={wK:true,wQR:true,wKR:true,bK:true,bQR:true,bKR:true};
   enPassantTarget=null;inCheck=false;lastFrom=null;lastTo=null;lastMoveWasAI=false;aiThinking=false;
   positionHistory={};
-  clearInterval(timerInterval);startTimer();
+  // Always fully stop timer before restarting
+  stopTimer();
+  startTimer();
   clearTipsFeed();
   renderBoard();updateUI();
   document.getElementById('move-list').innerHTML='';
-  document.getElementById('last-move-display').innerHTML='';
+  if(document.getElementById('last-move-display'))
+    document.getElementById('last-move-display').innerHTML='';
   document.getElementById('overlay').classList.remove('active');
+}
+
+function stopTimer(){
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval=null;
+  }
 }
 
 function startTimer(){
@@ -1538,7 +1548,7 @@ function updateMoveList(){
 }
 
 function endGame(title,sub,fromServer=false){
-  clearInterval(timerInterval);
+  stopTimer();
   stopMusic();
   document.getElementById('overlay-title').textContent=title;
   document.getElementById('overlay-sub').textContent=sub;
