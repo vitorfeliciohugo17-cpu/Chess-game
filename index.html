@@ -323,6 +323,7 @@
   .mobile-stat-box.red{border-color:var(--neon-red);box-shadow:0 0 8px var(--neon-red);}
   .mob-label{font-size:6px;color:var(--neon-cyan);text-shadow:0 0 5px var(--neon-cyan);letter-spacing:1px;margin-bottom:3px;}
   .mob-label.red{color:var(--neon-red);text-shadow:0 0 5px var(--neon-red);}
+  .mob-name{font-family:'Press Start 2P',monospace;font-size:clamp(7px,2.5vw,10px);color:var(--neon-yellow);text-shadow:0 0 6px var(--neon-yellow);margin:3px 0;letter-spacing:1px;}
   .mob-name{font-size:clamp(8px,2.5vw,11px);color:var(--neon-yellow);text-shadow:0 0 6px var(--neon-yellow);margin:2px 0;}
   .mob-hp{width:100%;height:8px;background:#111;border:1px solid #333;margin:4px 0;overflow:hidden;}
   .mob-hp-fill{height:100%;transition:width .3s;}
@@ -1176,7 +1177,16 @@ function resetGame(){
   castlingRights={wK:true,wQR:true,wKR:true,bK:true,bQR:true,bKR:true};
   enPassantTarget=null;inCheck=false;lastFrom=null;lastTo=null;lastMoveWasAI=false;aiThinking=false;
   positionHistory={};
-  // Always fully stop timer before restarting
+  // Always update mobile names on reset
+  const mw = document.getElementById('mob-name-white');
+  const mb = document.getElementById('mob-name-black');
+  if(mw) mw.textContent = gameMode==='online' ? (onlineColor==='white'?myPlayerName:opponentName) : 'PLAYER 1';
+  if(mb) mb.textContent = gameMode==='online' ? (onlineColor==='white'?opponentName:myPlayerName) : gameMode==='ai' ? 'MESTRE X 🤖' : 'PLAYER 2';
+  // Always update desktop names too
+  const nw = document.getElementById('name-white');
+  const nb = document.getElementById('name-black');
+  if(nw) nw.textContent = mw ? mw.textContent : 'PLAYER 1';
+  if(nb) nb.textContent = mb ? mb.textContent : 'PLAYER 2';
   stopTimer();
   startTimer();
   clearTipsFeed();
