@@ -306,13 +306,41 @@
   @media(max-width:700px){.side-panel{width:130px}.tut-info{width:90vw}}
   @media(max-width:500px){.side-panel{display:none}}
 
-  /* Mobile board fix */
+  /* MOBILE STATS BAR */
+  .mobile-stats{
+    display:none;
+    width:100%;
+    max-width:500px;
+    margin-top:10px;
+    gap:8px;
+  }
+  .mobile-stat-box{
+    flex:1;border:2px solid var(--neon-cyan);
+    box-shadow:0 0 8px var(--neon-cyan);
+    background:rgba(0,15,25,0.95);
+    padding:8px 6px;text-align:center;
+  }
+  .mobile-stat-box.red{border-color:var(--neon-red);box-shadow:0 0 8px var(--neon-red);}
+  .mob-label{font-size:6px;color:var(--neon-cyan);text-shadow:0 0 5px var(--neon-cyan);letter-spacing:1px;margin-bottom:3px;}
+  .mob-label.red{color:var(--neon-red);text-shadow:0 0 5px var(--neon-red);}
+  .mob-name{font-size:clamp(8px,2.5vw,11px);color:var(--neon-yellow);text-shadow:0 0 6px var(--neon-yellow);margin:2px 0;}
+  .mob-hp{width:100%;height:8px;background:#111;border:1px solid #333;margin:4px 0;overflow:hidden;}
+  .mob-hp-fill{height:100%;transition:width .3s;}
+  .mob-hp-fill.w{background:linear-gradient(90deg,var(--neon-cyan),#fff);}
+  .mob-hp-fill.b{background:linear-gradient(90deg,var(--neon-red),#FF8C00);}
+  .mob-score{font-family:'VT323',monospace;font-size:16px;color:var(--neon-green);text-shadow:0 0 6px var(--neon-green);}
+  .mob-timer{font-family:'VT323',monospace;font-size:20px;color:var(--neon-green);text-shadow:0 0 7px var(--neon-green);}
+  .mob-timer.warn{color:var(--neon-red);animation:blink .5s step-end infinite;}
+  .mob-caps{font-size:12px;min-height:16px;margin-top:2px;}
+
   @media(max-width:600px){
-    .square{width:11vw!important;height:11vw!important;font-size:7vw!important;min-width:38px!important;min-height:38px!important;}
+    .side-panel{display:none!important;}
+    .mobile-stats{display:flex!important;}
+    .square{width:11vw!important;height:11vw!important;font-size:7vw!important;min-width:36px!important;min-height:36px!important;}
     #chess-board{width:88vw!important;}
     .board-frame{padding:4px!important;}
     .board-wrapper{width:100vw;}
-    .game-layout{gap:6px!important;}
+    .game-layout{gap:4px!important;}
   }
 </style>
 </head>
@@ -549,6 +577,28 @@
           ♚ <span id="name-black">PLAYER 2</span>
         </div>
       </div>
+      <!-- Mobile stats — só aparece no celular -->
+      <div class="mobile-stats" id="mobile-stats">
+        <!-- Brancas -->
+        <div class="mobile-stat-box">
+          <div class="mob-label">P1 - WHITE</div>
+          <div class="mob-name" id="mob-name-white">PLAYER 1</div>
+          <div class="mob-hp"><div class="mob-hp-fill w" id="mob-hp-white" style="width:100%"></div></div>
+          <div class="mob-score" id="mob-score-white">000000</div>
+          <div class="mob-timer" id="mob-timer-white">10:00</div>
+          <div class="mob-caps" id="mob-caps-white"></div>
+        </div>
+        <!-- Pretas -->
+        <div class="mobile-stat-box red">
+          <div class="mob-label red" id="mob-label-black">P2 - BLACK</div>
+          <div class="mob-name" id="mob-name-black">PLAYER 2</div>
+          <div class="mob-hp"><div class="mob-hp-fill b" id="mob-hp-black" style="width:100%"></div></div>
+          <div class="mob-score" id="mob-score-black">000000</div>
+          <div class="mob-timer" id="mob-timer-black">10:00</div>
+          <div class="mob-caps" id="mob-caps-black"></div>
+        </div>
+      </div>
+
       <div class="btn-group">
         <button class="arcade-btn" onclick="resetGame()">↺ NEW GAME</button>
         <button class="arcade-btn red-btn" onclick="undoMove()">◄ UNDO</button>
@@ -1085,9 +1135,12 @@ function startGameMode(mode){
   document.getElementById('coach-box').style.display=mode==='ai'?'block':'none';
   document.getElementById('last-move-box').style.display=mode==='ai'?'none':'block';
   document.getElementById('tips-feed-wrap').style.display=mode==='ai'?'block':'none';
-  // Update names bar
+  // Update names bar and mobile panel names
   document.getElementById('name-white').textContent = 'PLAYER 1';
   document.getElementById('name-black').textContent = mode==='ai' ? 'MESTRE X 🤖' : 'PLAYER 2';
+  document.getElementById('mob-name-white').textContent = 'PLAYER 1';
+  document.getElementById('mob-name-black').textContent = mode==='ai' ? 'MESTRE X 🤖' : 'PLAYER 2';
+  document.getElementById('mob-label-black').textContent = mode==='ai' ? 'IA - BLACK' : 'P2 - BLACK';
   clearTipsFeed();
   coachHistory=[];
   showScreen('game');
@@ -1132,6 +1185,10 @@ function updateTimers(){
   wt.textContent=formatTime(whiteTime);bt.textContent=formatTime(blackTime);
   wt.className='timer-display'+(whiteTime<60?' warning':'');
   bt.className='timer-display'+(blackTime<60?' warning':'');
+  // Mobile timers
+  const mwt=document.getElementById('mob-timer-white'),mbt=document.getElementById('mob-timer-black');
+  if(mwt){mwt.textContent=formatTime(whiteTime);mwt.className='mob-timer'+(whiteTime<60?' warn':'');}
+  if(mbt){mbt.textContent=formatTime(blackTime);mbt.className='mob-timer'+(blackTime<60?' warn':'');}
 }
 
 // ══════════════════════════════════════════
@@ -1421,17 +1478,29 @@ function undoMove(){
 }
 
 function updateUI(){
+  const maxVal=39;
+  const wLost=capturedByBlack.reduce((s,p)=>s+(PIECE_VALUES[pt(p)]||0),0);
+  const bLost=capturedByWhite.reduce((s,p)=>s+(PIECE_VALUES[pt(p)]||0),0);
+  const wHp=Math.max(0,100-wLost/maxVal*100);
+  const bHp=Math.max(0,100-bLost/maxVal*100);
+
+  // Desktop panels
   document.getElementById('score-white').textContent=String(scoreWhite).padStart(6,'0');
   document.getElementById('score-black').textContent=String(scoreBlack).padStart(6,'0');
   document.getElementById('captured-by-white').textContent=capturedByWhite.map(p=>PIECES[p]).join('');
   document.getElementById('captured-by-black').textContent=capturedByBlack.map(p=>PIECES[p]).join('');
-  const maxVal=39;
-  const wLost=capturedByBlack.reduce((s,p)=>s+(PIECE_VALUES[pt(p)]||0),0);
-  const bLost=capturedByWhite.reduce((s,p)=>s+(PIECE_VALUES[pt(p)]||0),0);
-  document.getElementById('hp-white').style.width=Math.max(0,100-wLost/maxVal*100)+'%';
-  document.getElementById('hp-black').style.width=Math.max(0,100-bLost/maxVal*100)+'%';
+  document.getElementById('hp-white').style.width=wHp+'%';
+  document.getElementById('hp-black').style.width=bHp+'%';
+
+  // Mobile panels
+  document.getElementById('mob-score-white').textContent=String(scoreWhite).padStart(6,'0');
+  document.getElementById('mob-score-black').textContent=String(scoreBlack).padStart(6,'0');
+  document.getElementById('mob-hp-white').style.width=wHp+'%';
+  document.getElementById('mob-hp-black').style.width=bHp+'%';
+  document.getElementById('mob-caps-white').textContent=capturedByWhite.map(p=>PIECES[p]).join('');
+  document.getElementById('mob-caps-black').textContent=capturedByBlack.map(p=>PIECES[p]).join('');
+
   const statusEl=document.getElementById('status-display');
-  const playerName=currentTurn==='w'?'PLAYER 1 (WHITE)':'(gameMode==="ai"?"IA (BLACK)":"PLAYER 2 (BLACK)")';
   if(!aiThinking){
     if(inCheck){statusEl.textContent='⚠ '+(currentTurn==='w'?'VOCÊ ESTÁ EM XEQUE!':'IA EM XEQUE!')+ ' ⚠';statusEl.className='status-display alert';}
     else if(currentTurn==='w'){statusEl.textContent=gameMode==='ai'?'SUA VEZ — MOVA AS BRANCAS':'PLAYER 1 (WHITE) TO MOVE';statusEl.className='status-display';}
@@ -1826,10 +1895,13 @@ function startOnlineGame() {
   document.getElementById('tips-feed-wrap').style.display = 'none';
   showScreen('game');
   resetGame();
-  // Update names bar
+  // Update names bar and mobile panels
   const isW = onlineColor === 'white';
   document.getElementById('name-white').textContent = isW ? myPlayerName : opponentName;
   document.getElementById('name-black').textContent = isW ? opponentName : myPlayerName;
+  document.getElementById('mob-name-white').textContent = isW ? myPlayerName : opponentName;
+  document.getElementById('mob-name-black').textContent = isW ? opponentName : myPlayerName;
+  document.getElementById('mob-label-black').textContent = '🌐 ONLINE';
   // Multiple render attempts for mobile compatibility
   [100, 300, 600, 1000].forEach(t => setTimeout(() => { renderBoard(); updateUI(); }, t));
 }
