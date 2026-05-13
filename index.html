@@ -650,7 +650,7 @@
   <div class="overlay-title" id="overlay-title">GAME OVER</div>
   <div class="overlay-sub" id="overlay-sub">PRESS START</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-    <button class="menu-btn yellow" style="width:auto;font-size:8px;padding:10px 20px" onclick="resetGame();document.getElementById('overlay').classList.remove('active')">▶ PLAY AGAIN</button>
+    <button class="menu-btn yellow" style="width:auto;font-size:8px;padding:10px 20px" onclick="document.getElementById('overlay').classList.remove('active');if(gameMode==='online'){disconnectOnline();showScreen('menu');}else{resetGame();}">▶ PLAY AGAIN</button>
     <button class="menu-btn" style="width:auto;font-size:8px;padding:10px 20px" onclick="document.getElementById('overlay').classList.remove('active');showScreen('menu')">⌂ MENU</button>
   </div>
 </div>
@@ -716,7 +716,21 @@ function forceRenderBoard() {
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  if(name!=='game')clearInterval(timerInterval);
+  if(name!=='game'){
+    clearInterval(timerInterval);
+    // Reset game mode when leaving game screen
+    if(name==='menu'){
+      gameMode='pvp';
+      aiThinking=false;
+      board=makeInitialBoard();
+      currentTurn='w';
+      selectedSq=null;
+      validMoves=[];
+      lastFrom=null;lastTo=null;
+      inCheck=false;
+      positionHistory={};
+    }
+  }
   if(name==='game' && board) forceRenderBoard();
 }
 
