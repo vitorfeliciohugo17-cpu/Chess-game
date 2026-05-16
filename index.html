@@ -10,6 +10,35 @@
     --neon-yellow:#FFE600; --neon-red:#FF003C; --neon-cyan:#00FFFF;
     --neon-green:#39FF14; --neon-purple:#BF00FF; --bg-dark:#08000F;
     --board-light:#C8A96E; --board-dark:#5C3A1E;
+    --piece-filter: drop-shadow(1px 1px 0 rgba(0,0,0,.8));
+  }
+
+  /* TEMA CLÁSSICO */
+  body.classic-theme {
+    --board-light: #F0D9B5;
+    --board-dark: #B58863;
+  }
+  body.classic-theme .square.light { background: #F0D9B5 !important; }
+  body.classic-theme .square.dark  { background: #B58863 !important; }
+  body.classic-theme .piece        { filter: none !important; }
+
+  /* Peças pretas no tema clássico */
+  body.classic-theme .piece-black  { color: #1a1a1a !important; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff !important; }
+  body.classic-theme .piece-white  { color: #fff !important; text-shadow: 1px 1px 0 #333, -1px -1px 0 #333 !important; }
+
+  /* Borda do tabuleiro no tema clássico */
+  body.classic-theme .board-frame {
+    border-color: #8B6914 !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+    background: #8B6914 !important;
+  }
+
+  /* Botão de tema ativo */
+  .arcade-btn.theme-active {
+    border-color: #F0D9B5 !important;
+    color: #F0D9B5 !important;
+    text-shadow: 0 0 6px #F0D9B5 !important;
+    box-shadow: 0 0 10px #F0D9B5, 4px 4px 0 #5a4000 !important;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg-dark);font-family:'Press Start 2P',monospace;color:var(--neon-yellow);min-height:100vh;overflow-x:hidden;overflow-y:auto;}
@@ -610,6 +639,7 @@
         <button class="arcade-btn" onclick="resetGame()">↺ NEW GAME</button>
         <button class="arcade-btn red-btn" onclick="undoMove()">◄ UNDO</button>
         <button class="arcade-btn green-btn" id="game-music-btn" onclick="toggleMusic()">🔊 SOM</button>
+        <button class="arcade-btn" id="theme-btn" onclick="toggleTheme()">♟ CLÁSSICO</button>
         <button class="arcade-btn purple-btn" onclick="showScreen('menu')">⌂ MENU</button>
       </div>
 
@@ -1277,7 +1307,21 @@ function renderBoard(){
     if(aiThinking)sq.classList.add('ai-thinking');
     const piece=board[r][c];
     if(piece){
-      const span=document.createElement('span');span.className='piece';span.textContent=PIECES[piece];
+      const span=document.createElement('span');
+      span.className='piece';
+      // Classic theme: white pieces = white, black pieces = dark
+      if(classicTheme){
+        if(cl(piece)==='w'){
+          span.style.color='#FFFFFF';
+          span.style.textShadow='1px 1px 0 #333,-1px -1px 0 #333,1px -1px 0 #333,-1px 1px 0 #333';
+          span.style.filter='none';
+        } else {
+          span.style.color='#1a1a1a';
+          span.style.textShadow='1px 1px 0 #fff,-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff';
+          span.style.filter='none';
+        }
+      }
+      span.textContent=PIECES[piece];
       if(lastTo&&lastTo[0]===r&&lastTo[1]===c){span.classList.add(lastMoveWasAI?'anim-ai-land':'anim-land');}
       sq.appendChild(span);
     }
@@ -1604,8 +1648,24 @@ function endGame(title,sub,fromServer=false){
 }
 
 // ══════════════════════════════════════════
-// AUDIO ENGINE — Wu-Tang Arcade Beat
+// THEME TOGGLE
 // ══════════════════════════════════════════
+let classicTheme = false;
+
+function toggleTheme() {
+  classicTheme = !classicTheme;
+  const btn = document.getElementById('theme-btn');
+  if (classicTheme) {
+    document.body.classList.add('classic-theme');
+    btn.textContent = '★ ARCADE';
+    btn.classList.add('theme-active');
+  } else {
+    document.body.classList.remove('classic-theme');
+    btn.textContent = '♟ CLÁSSICO';
+    btn.classList.remove('theme-active');
+  }
+  renderBoard();
+}
 let audioCtx = null;
 let musicOn = true;
 let musicNodes = [];
