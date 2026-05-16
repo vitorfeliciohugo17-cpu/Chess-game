@@ -1875,8 +1875,16 @@ function handleServerMessage(msg) {
       document.getElementById('online-lobby-btns').style.display = 'none';
       setOnlineStatus(`Conectado! Aguardando ${opponentName} iniciar...`, 'var(--neon-green)');
       document.getElementById('online-waiting').style.display = 'block';
-      // Joining player goes straight to game after connecting
-      setTimeout(() => startOnlineGame(), 800);
+      // Wait longer then use requestAnimationFrame for proper render
+      setTimeout(() => {
+        startOnlineGame();
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(()=>{
+            renderBoard();
+            updateUI();
+          });
+        });
+      }, 1200);
       break;
 
     case 'opponent_joined':
@@ -1893,6 +1901,12 @@ function handleServerMessage(msg) {
 
     case 'opponent_ready':
       startOnlineGame();
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          renderBoard();
+          updateUI();
+        });
+      });
       break;
 
     case 'move':
