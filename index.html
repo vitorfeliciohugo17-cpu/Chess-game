@@ -276,6 +276,7 @@
   .status-display{font-size:7px;color:var(--neon-green);text-shadow:0 0 5px var(--neon-green);text-align:center;min-height:20px;padding:4px;}
   .status-display.alert{color:var(--neon-red);text-shadow:0 0 10px var(--neon-red);animation:alertFlash .3s ease 3;}
   .status-display.ai{color:var(--neon-purple);text-shadow:0 0 8px var(--neon-purple);animation:blink .8s step-end infinite;}
+  .status-display.start{color:var(--neon-yellow);text-shadow:0 0 10px var(--neon-yellow);animation:blink .6s step-end infinite;font-size:8px;}
   @keyframes alertFlash{50%{opacity:0}}
   .turn-indicator{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;}
   .turn-arrow{font-size:8px;color:var(--neon-green);text-shadow:0 0 7px var(--neon-green);animation:bounce .5s infinite alternate;}
@@ -285,7 +286,16 @@
   .arcade-btn{font-family:'Press Start 2P',monospace;font-size:7px;padding:7px 11px;border:3px solid var(--neon-cyan);background:rgba(0,30,40,.9);color:var(--neon-cyan);text-shadow:0 0 5px var(--neon-cyan);box-shadow:0 0 7px var(--neon-cyan),4px 4px 0 #004455;cursor:pointer;letter-spacing:1px;transition:all .1s;position:relative;top:0;}
   .arcade-btn:hover{background:rgba(0,255,255,.13);}
   .arcade-btn:active{top:3px;}
-  .arcade-btn.red-btn{border-color:var(--neon-red);color:var(--neon-red);text-shadow:0 0 5px var(--neon-red);box-shadow:0 0 7px var(--neon-red),4px 4px 0 #440011;}
+  .arcade-btn.pulse{
+    animation:btnPulse .6s ease infinite alternate;
+    border-color:var(--neon-yellow)!important;
+    color:var(--neon-yellow)!important;
+    text-shadow:0 0 8px var(--neon-yellow)!important;
+  }
+  @keyframes btnPulse{
+    from{box-shadow:0 0 7px var(--neon-yellow),4px 4px 0 #5a3000;transform:scale(1);}
+    to{box-shadow:0 0 20px var(--neon-yellow),0 0 40px var(--neon-yellow),4px 4px 0 #5a3000;transform:scale(1.05);}
+  }
   .arcade-btn.purple-btn{border-color:var(--neon-purple);color:var(--neon-purple);text-shadow:0 0 5px var(--neon-purple);box-shadow:0 0 7px var(--neon-purple),4px 4px 0 #330044;}
   .arcade-btn.green-btn{border-color:var(--neon-green);color:var(--neon-green);text-shadow:0 0 5px var(--neon-green);box-shadow:0 0 7px var(--neon-green),4px 4px 0 #003300;}
   .arcade-btn.green-btn.muted{border-color:#444;color:#555;text-shadow:none;box-shadow:0 0 3px #333,3px 3px 0 #111;}
@@ -719,7 +729,6 @@ function showScreen(name){
   document.getElementById('screen-'+name).classList.add('active');
   if(name!=='game'){
     stopTimer();
-    // Reset game mode when leaving game screen
     if(name==='menu'){
       gameMode='pvp';
       aiThinking=false;
@@ -732,7 +741,6 @@ function showScreen(name){
       positionHistory={};
     }
   }
-  if(name==='game' && board) forceRenderBoard();
 }
 
 // ══════════════════════════════════════════
@@ -1150,7 +1158,6 @@ function startGameMode(mode){
   document.getElementById('coach-box').style.display=mode==='ai'?'block':'none';
   document.getElementById('last-move-box').style.display=mode==='ai'?'none':'block';
   document.getElementById('tips-feed-wrap').style.display=mode==='ai'?'block':'none';
-  // Update names bar and mobile panel names
   document.getElementById('name-white').textContent = 'PLAYER 1';
   document.getElementById('name-black').textContent = mode==='ai' ? 'MESTRE X 🤖' : 'PLAYER 2';
   document.getElementById('mob-name-white').textContent = 'PLAYER 1';
@@ -1158,12 +1165,19 @@ function startGameMode(mode){
   document.getElementById('mob-label-black').textContent = mode==='ai' ? 'IA - BLACK' : 'P2 - BLACK';
   clearTipsFeed();
   coachHistory=[];
-  showScreen('game');
+  // Reset FIRST, then show screen
   resetGame();
+  showScreen('game');
+  // Force render after screen is visible
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      renderBoard();
+      updateUI();
+    });
+  });
   if(mode==='ai'){
     setTimeout(()=>{
       typeCoach('MESTRE X: Bem-vindo ao Modo Prática! Você joga com as peças BRANCAS. Eu jogo com as PRETAS e vou te ensinar xadrez a cada jogada. Faça seu primeiro movimento!',document.getElementById('coach-text'));
-      // Welcome tips
       setTimeout(()=>addTip('strat','DICA DE ABERTURA: Comece movendo o peão do centro (e2→e4). Isso libera espaço para seus bispos e controla o centro!','♟'),1200);
       setTimeout(()=>addTip('info','OBJETIVO: Dar xeque-mate no rei adversário. Isso significa que o rei não tem como escapar do ataque!','👑'),3000);
     },500);
@@ -1177,7 +1191,14 @@ function resetGame(){
   castlingRights={wK:true,wQR:true,wKR:true,bK:true,bQR:true,bKR:true};
   enPassantTarget=null;inCheck=false;lastFrom=null;lastTo=null;lastMoveWasAI=false;aiThinking=false;
   positionHistory={};
-  // Always update mobile names on reset
+  // Remove NEW GAME pulse when pressed
+  const ngBtn=document.querySelector('.arcade-btn');
+  if(ngBtn)ngBtn.classList.remove('pulse');
+  // Clear start message if not online
+  if(gameMode!=='online'){
+    const st=document.getElementById('status-display');
+    if(st)st.className='status-display';
+  }
   const mw = document.getElementById('mob-name-white');
   const mb = document.getElementById('mob-name-black');
   if(mw) mw.textContent = gameMode==='online' ? (onlineColor==='white'?myPlayerName:opponentName) : 'PLAYER 1';
@@ -1535,10 +1556,11 @@ function updateUI(){
   document.getElementById('mob-caps-black').textContent=capturedByBlack.map(p=>PIECES[p]).join('');
 
   const statusEl=document.getElementById('status-display');
-  if(!aiThinking){
+  // Don't override the "press NEW GAME" message in online mode
+  if(!aiThinking && statusEl.className !== 'status-display start'){
     if(inCheck){statusEl.textContent='⚠ '+(currentTurn==='w'?'VOCÊ ESTÁ EM XEQUE!':'IA EM XEQUE!')+ ' ⚠';statusEl.className='status-display alert';}
-    else if(currentTurn==='w'){statusEl.textContent=gameMode==='ai'?'SUA VEZ — MOVA AS BRANCAS':'PLAYER 1 (WHITE) TO MOVE';statusEl.className='status-display';}
-    else{statusEl.textContent=gameMode==='ai'?'🤖 VEZ DA IA...':'PLAYER 2 (BLACK) TO MOVE';statusEl.className='status-display'+(gameMode==='ai'?' ai':'');}
+    else if(currentTurn==='w'){statusEl.textContent=gameMode==='ai'?'SUA VEZ — MOVA AS BRANCAS':gameMode==='online'?`VEZ DAS BRANCAS — ${document.getElementById('name-white').textContent}`:'PLAYER 1 (WHITE) TO MOVE';statusEl.className='status-display';}
+    else{statusEl.textContent=gameMode==='ai'?'🤖 VEZ DA IA...':gameMode==='online'?`VEZ DAS PRETAS — ${document.getElementById('name-black').textContent}`:'PLAYER 2 (BLACK) TO MOVE';statusEl.className='status-display'+(gameMode==='ai'?' ai':'');}
   }
   document.getElementById('turn-text').textContent=currentTurn==='w'?'WHITE\'S TURN':'BLACK\'S TURN';
   updateTimers();
@@ -1929,15 +1951,26 @@ function startOnlineGame() {
   document.getElementById('tips-feed-wrap').style.display = 'none';
   showScreen('game');
   resetGame();
-  // Update names bar and mobile panels
+  // Update names after reset
   const isW = onlineColor === 'white';
   document.getElementById('name-white').textContent = isW ? myPlayerName : opponentName;
   document.getElementById('name-black').textContent = isW ? opponentName : myPlayerName;
   document.getElementById('mob-name-white').textContent = isW ? myPlayerName : opponentName;
   document.getElementById('mob-name-black').textContent = isW ? opponentName : myPlayerName;
   document.getElementById('mob-label-black').textContent = '🌐 ONLINE';
-  // Multiple render attempts for mobile compatibility
-  [100, 300, 600, 1000].forEach(t => setTimeout(() => { renderBoard(); updateUI(); }, t));
+  // Force render after screen is visible
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      renderBoard();
+      updateUI();
+    });
+  });
+  // Show instruction and pulse NEW GAME button
+  const statusEl = document.getElementById('status-display');
+  statusEl.textContent = '★ APERTE NEW GAME PARA COMEÇAR! ★';
+  statusEl.className = 'status-display start';
+  const newGameBtn = document.querySelector('.arcade-btn');
+  if(newGameBtn) newGameBtn.classList.add('pulse');
 }
 
 function applyOnlineMove(from, to, moveInfo) {
