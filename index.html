@@ -209,13 +209,13 @@
 
   /* BOARD */
   .board-wrapper{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:clamp(340px,60vw,490px);}
-  .board-frame{border:4px solid var(--neon-yellow);box-shadow:0 0 20px var(--neon-yellow),0 0 40px rgba(255,230,0,0.28),inset 0 0 18px rgba(255,230,0,0.04);padding:8px;background:#1a0a00;position:relative;min-width:clamp(336px,59vw,482px);}
+  .board-frame{border:4px solid var(--neon-yellow);box-shadow:0 0 20px var(--neon-yellow),0 0 40px rgba(255,230,0,0.28),inset 0 0 18px rgba(255,230,0,0.04);padding:8px;background:#1a0a00;position:relative;width:fit-content;}
   .board-frame::before{content:'';display:none;}
   .board-col-labels{display:flex;padding-left:12px;}
   .col-label{font-family:'VT323',monospace;font-size:12px;color:var(--neon-yellow);opacity:.7;text-align:center;}
   .coord-label{font-family:'VT323',monospace;font-size:12px;width:12px;text-align:center;color:var(--neon-yellow);opacity:.7;display:flex;align-items:center;}
-  #chess-board{display:grid;grid-template-columns:repeat(8,1fr);border:2px solid #5a3a00;width:clamp(336px,56vw,480px);}
-  .square{width:clamp(42px,7vw,60px);height:clamp(42px,7vw,60px);min-width:42px;min-height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:clamp(20px,3.8vw,32px);user-select:none;transition:filter .1s;}
+  #chess-board{display:grid;grid-template-columns:repeat(8,56px);border:2px solid #5a3a00;}
+  .square{width:56px;height:56px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:30px;user-select:none;transition:filter .1s;}
   .square.light{background:var(--board-light);}
   .square.dark{background:var(--board-dark);}
   .square.selected{background:#FFE066!important;box-shadow:inset 0 0 0 3px var(--neon-yellow),0 0 12px var(--neon-yellow);z-index:2;}
@@ -347,8 +347,8 @@
   @media(max-width:600px){
     .side-panel{display:none!important;}
     .mobile-stats{display:flex!important;}
-    .square{width:11vw!important;height:11vw!important;font-size:7vw!important;min-width:36px!important;min-height:36px!important;}
-    #chess-board{width:88vw!important;}
+    .square{width:42px!important;height:42px!important;font-size:22px!important;}
+    #chess-board{grid-template-columns:repeat(8,42px)!important;}
     .board-frame{padding:4px!important;}
     .board-wrapper{width:100vw;}
     .game-layout{gap:4px!important;}
@@ -1260,7 +1260,7 @@ function renderBoard(){
   const colLabels=document.getElementById('col-labels');colLabels.innerHTML='';
   const letters=['a','b','c','d','e','f','g','h'];
   const sq0=document.createElement('div');sq0.style.width='12px';colLabels.appendChild(sq0);
-  letters.forEach(l=>{const lbl=document.createElement('div');lbl.className='col-label';lbl.textContent=l;lbl.style.width='clamp(42px,7vw,58px)';lbl.style.textAlign='center';colLabels.appendChild(lbl);});
+  letters.forEach(l=>{const lbl=document.createElement('div');lbl.className='col-label';lbl.textContent=l;lbl.style.width='56px';lbl.style.textAlign='center';colLabels.appendChild(lbl);});
   const boardEl=document.createElement('div');boardEl.id='chess-board';boardEl.style.display='grid';boardEl.style.gridTemplateColumns='repeat(8,1fr)';
   const validSet=new Set(validMoves.map(m=>m.r*8+m.c));
   for(let r=0;r<8;r++)for(let c=0;c<8;c++){
@@ -1283,7 +1283,7 @@ function renderBoard(){
   }
   const wrapper=document.createElement('div');wrapper.style.display='flex';
   const labelsCol=document.createElement('div');labelsCol.style.display='flex';labelsCol.style.flexDirection='column';
-  for(let r=0;r<8;r++){const lbl=document.createElement('div');lbl.className='coord-label';lbl.textContent=8-r;lbl.style.height='clamp(42px,7vw,58px)';labelsCol.appendChild(lbl);}
+  for(let r=0;r<8;r++){const lbl=document.createElement('div');lbl.className='coord-label';lbl.textContent=8-r;lbl.style.height='56px';labelsCol.appendChild(lbl);}
   wrapper.appendChild(labelsCol);wrapper.appendChild(boardEl);container.appendChild(wrapper);
 }
 
