@@ -1881,7 +1881,7 @@ function handleServerMessage(msg) {
       document.getElementById('online-lobby-btns').style.display = 'none';
       setOnlineStatus(`Conectado! Iniciando jogo...`, 'var(--neon-green)');
       document.getElementById('online-waiting').style.display = 'block';
-      setTimeout(() => startAndRender(), 800);
+      setTimeout(() => startAndRender(), 1500);
       break;
 
     case 'opponent_joined':
@@ -1943,16 +1943,14 @@ function joinRoom() {
 
 function startAndRender() {
   startOnlineGame();
-  // Keep trying until board has 64 squares
+  // Keep trying until board has 64 squares — up to 5 seconds
   let tries = 0;
   const tryRender = setInterval(() => {
+    renderBoard();
+    updateUI();
     const b = document.getElementById('chess-board');
-    if (!b || b.children.length < 64) {
-      renderBoard();
-      updateUI();
-      tries++;
-      if (tries > 30) clearInterval(tryRender);
-    } else {
+    tries++;
+    if ((b && b.children.length >= 64) || tries > 50) {
       clearInterval(tryRender);
     }
   }, 100);
