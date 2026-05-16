@@ -1246,15 +1246,28 @@ function updateTimers(){
 // RENDER
 // ══════════════════════════════════════════
 function renderBoard(){
+  // Calculate square size based on screen width
+  const isMobile = window.innerWidth <= 600;
+  const sqSize = isMobile ? Math.floor((window.innerWidth - 40) / 8) : 56;
+  const sqPx = sqSize + 'px';
+  const fontSize = isMobile ? Math.floor(sqSize * 0.65) + 'px' : '30px';
+
   const container=document.getElementById('board-coords');container.innerHTML='';
   const colLabels=document.getElementById('col-labels');colLabels.innerHTML='';
   const letters=['a','b','c','d','e','f','g','h'];
-  const sq0=document.createElement('div');sq0.style.width='12px';colLabels.appendChild(sq0);
-  letters.forEach(l=>{const lbl=document.createElement('div');lbl.className='col-label';lbl.textContent=l;lbl.style.width='56px';lbl.style.textAlign='center';colLabels.appendChild(lbl);});
-  const boardEl=document.createElement('div');boardEl.id='chess-board';boardEl.style.display='grid';boardEl.style.gridTemplateColumns='repeat(8,1fr)';
+  const sq0=document.createElement('div');sq0.style.width='8px';colLabels.appendChild(sq0);
+  letters.forEach(l=>{const lbl=document.createElement('div');lbl.className='col-label';lbl.textContent=l;lbl.style.width=sqPx;lbl.style.textAlign='center';colLabels.appendChild(lbl);});
+  const boardEl=document.createElement('div');boardEl.id='chess-board';
+  boardEl.style.display='grid';
+  boardEl.style.gridTemplateColumns=`repeat(8,${sqPx})`;
+  boardEl.style.border='2px solid #5a3a00';
   const validSet=new Set(validMoves.map(m=>m.r*8+m.c));
   for(let r=0;r<8;r++)for(let c=0;c<8;c++){
-    const sq=document.createElement('div');sq.className='square '+((r+c)%2===0?'light':'dark');
+    const sq=document.createElement('div');
+    sq.className='square '+((r+c)%2===0?'light':'dark');
+    sq.style.width=sqPx;
+    sq.style.height=sqPx;
+    sq.style.fontSize=fontSize;
     const idx=r*8+c;
     if(selectedSq&&selectedSq[0]===r&&selectedSq[1]===c)sq.classList.add('selected');
     if(lastFrom&&lastFrom[0]===r&&lastFrom[1]===c)sq.classList.add(lastMoveWasAI?'ai-from':'last-move-from');
@@ -1273,7 +1286,7 @@ function renderBoard(){
   }
   const wrapper=document.createElement('div');wrapper.style.display='flex';
   const labelsCol=document.createElement('div');labelsCol.style.display='flex';labelsCol.style.flexDirection='column';
-  for(let r=0;r<8;r++){const lbl=document.createElement('div');lbl.className='coord-label';lbl.textContent=8-r;lbl.style.height='56px';labelsCol.appendChild(lbl);}
+  for(let r=0;r<8;r++){const lbl=document.createElement('div');lbl.className='coord-label';lbl.textContent=8-r;lbl.style.height=sqPx;lbl.style.width='8px';labelsCol.appendChild(lbl);}
   wrapper.appendChild(labelsCol);wrapper.appendChild(boardEl);container.appendChild(wrapper);
 }
 
