@@ -1879,24 +1879,9 @@ function handleServerMessage(msg) {
       onlineRoom = msg.code;
       opponentName = msg.opponentName || 'AMIGO';
       document.getElementById('online-lobby-btns').style.display = 'none';
-      setOnlineStatus(`Conectado! Aguardando ${opponentName} iniciar...`, 'var(--neon-green)');
+      setOnlineStatus(`Conectado! Iniciando jogo...`, 'var(--neon-green)');
       document.getElementById('online-waiting').style.display = 'block';
-      setTimeout(() => {
-        startOnlineGame();
-        // Keep trying to render until board has squares
-        let tries = 0;
-        const tryRender = setInterval(() => {
-          const b = document.getElementById('chess-board');
-          if (!b || b.children.length < 64) {
-            renderBoard();
-            updateUI();
-            tries++;
-            if (tries > 20) clearInterval(tryRender);
-          } else {
-            clearInterval(tryRender);
-          }
-        }, 100);
-      }, 500);
+      setTimeout(() => startAndRender(), 800);
       break;
 
     case 'opponent_joined':
@@ -1904,27 +1889,13 @@ function handleServerMessage(msg) {
       document.getElementById('online-waiting').style.display = 'none';
       document.getElementById('online-lobby-btns').style.display = 'none';
       document.getElementById('online-room-code').style.display = 'none';
-      setOnlineStatus(`${opponentName} conectou!`, 'var(--neon-green)');
-      // Show ready box with opponent name
-      document.getElementById('online-ready-box').querySelector('div').innerHTML =
-        `${opponentName} ENTROU NA SALA!<br>VOCÊ ESTÁ PRONTO?`;
-      document.getElementById('online-ready-box').style.display = 'block';
+      document.getElementById('online-ready-box').style.display = 'none';
+      setOnlineStatus(`${opponentName} conectou! Iniciando...`, 'var(--neon-green)');
+      setTimeout(() => startAndRender(), 800);
       break;
 
     case 'opponent_ready':
-      startOnlineGame();
-      let triesR = 0;
-      const tryRenderR = setInterval(() => {
-        const b = document.getElementById('chess-board');
-        if (!b || b.children.length < 64) {
-          renderBoard();
-          updateUI();
-          triesR++;
-          if (triesR > 20) clearInterval(tryRenderR);
-        } else {
-          clearInterval(tryRenderR);
-        }
-      }, 100);
+      startAndRender();
       break;
 
     case 'move':
@@ -1968,6 +1939,23 @@ function joinRoom() {
   connectWS(() => {
     ws.send(JSON.stringify({ type: 'join', code, name: myPlayerName }));
   });
+}
+
+function startAndRender() {
+  startOnlineGame();
+  // Keep trying until board has 64 squares
+  let tries = 0;
+  const tryRender = setInterval(() => {
+    const b = document.getElementById('chess-board');
+    if (!b || b.children.length < 64) {
+      renderBoard();
+      updateUI();
+      tries++;
+      if (tries > 30) clearInterval(tryRender);
+    } else {
+      clearInterval(tryRender);
+    }
+  }, 100);
 }
 
 function startOnlineGame() {
