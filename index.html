@@ -1881,7 +1881,7 @@ function handleServerMessage(msg) {
       document.getElementById('online-lobby-btns').style.display = 'none';
       setOnlineStatus(`Conectado! Iniciando jogo...`, 'var(--neon-green)');
       document.getElementById('online-waiting').style.display = 'block';
-      setTimeout(() => startAndRender(), 1000);
+      setTimeout(() => startAndRender(), 2000);
       break;
 
     case 'opponent_joined':
@@ -1891,7 +1891,7 @@ function handleServerMessage(msg) {
       document.getElementById('online-room-code').style.display = 'none';
       document.getElementById('online-ready-box').style.display = 'none';
       setOnlineStatus(`${opponentName} conectou! Iniciando...`, 'var(--neon-green)');
-      setTimeout(() => startAndRender(), 1000);
+      setTimeout(() => startAndRender(), 2000);
       break;
 
     case 'opponent_ready':
