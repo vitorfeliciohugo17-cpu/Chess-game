@@ -516,6 +516,9 @@
   </div>
   <div id="online-error" style="font-size:8px;color:var(--neon-red);text-shadow:0 0 6px var(--neon-red);margin-top:10px;display:none;"></div>
 </div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
   <div class="game-header">
     <div class="game-title">♟ THE GAME OF CHESS ♟</div>
     <div class="game-mode-badge" id="game-mode-badge">▶▶ 2-PLAYER VS MODE ◀◀</div>
@@ -726,7 +729,9 @@ function forceRenderBoard() {
 
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('screen-'+name).classList.add('active');
+  const el = document.getElementById('screen-'+name);
+  if(!el){ console.warn('Screen not found: screen-'+name); return; }
+  el.classList.add('active');
   if(name!=='game'){
     stopTimer();
     if(name==='menu'){
@@ -1881,7 +1886,7 @@ function handleServerMessage(msg) {
       document.getElementById('online-lobby-btns').style.display = 'none';
       setOnlineStatus(`Conectado! Iniciando jogo...`, 'var(--neon-green)');
       document.getElementById('online-waiting').style.display = 'block';
-      setTimeout(() => startAndRender(), 2000);
+      setTimeout(() => startAndRender(), 1000);
       break;
 
     case 'opponent_joined':
@@ -1891,7 +1896,7 @@ function handleServerMessage(msg) {
       document.getElementById('online-room-code').style.display = 'none';
       document.getElementById('online-ready-box').style.display = 'none';
       setOnlineStatus(`${opponentName} conectou! Iniciando...`, 'var(--neon-green)');
-      setTimeout(() => startAndRender(), 2000);
+      setTimeout(() => startAndRender(), 1000);
       break;
 
     case 'opponent_ready':
