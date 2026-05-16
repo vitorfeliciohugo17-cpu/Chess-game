@@ -1168,13 +1168,19 @@ function startGameMode(mode){
   // Reset FIRST, then show screen
   resetGame();
   showScreen('game');
-  // Force render after screen is visible
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
+  // Keep trying to render until board appears
+  let triesG = 0;
+  const tryRenderG = setInterval(() => {
+    const b = document.getElementById('chess-board');
+    if (!b || b.children.length < 64) {
       renderBoard();
       updateUI();
-    });
-  });
+      triesG++;
+      if (triesG > 20) clearInterval(tryRenderG);
+    } else {
+      clearInterval(tryRenderG);
+    }
+  }, 100);
   if(mode==='ai'){
     setTimeout(()=>{
       typeCoach('MESTRE X: Bem-vindo ao Modo Prática! Você joga com as peças BRANCAS. Eu jogo com as PRETAS e vou te ensinar xadrez a cada jogada. Faça seu primeiro movimento!',document.getElementById('coach-text'));
@@ -1875,16 +1881,22 @@ function handleServerMessage(msg) {
       document.getElementById('online-lobby-btns').style.display = 'none';
       setOnlineStatus(`Conectado! Aguardando ${opponentName} iniciar...`, 'var(--neon-green)');
       document.getElementById('online-waiting').style.display = 'block';
-      // Wait longer then use requestAnimationFrame for proper render
       setTimeout(() => {
         startOnlineGame();
-        requestAnimationFrame(()=>{
-          requestAnimationFrame(()=>{
+        // Keep trying to render until board has squares
+        let tries = 0;
+        const tryRender = setInterval(() => {
+          const b = document.getElementById('chess-board');
+          if (!b || b.children.length < 64) {
             renderBoard();
             updateUI();
-          });
-        });
-      }, 1200);
+            tries++;
+            if (tries > 20) clearInterval(tryRender);
+          } else {
+            clearInterval(tryRender);
+          }
+        }, 100);
+      }, 500);
       break;
 
     case 'opponent_joined':
@@ -1901,12 +1913,18 @@ function handleServerMessage(msg) {
 
     case 'opponent_ready':
       startOnlineGame();
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
+      let triesR = 0;
+      const tryRenderR = setInterval(() => {
+        const b = document.getElementById('chess-board');
+        if (!b || b.children.length < 64) {
           renderBoard();
           updateUI();
-        });
-      });
+          triesR++;
+          if (triesR > 20) clearInterval(tryRenderR);
+        } else {
+          clearInterval(tryRenderR);
+        }
+      }, 100);
       break;
 
     case 'move':
