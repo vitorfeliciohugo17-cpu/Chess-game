@@ -337,14 +337,14 @@
   @media(max-width:600px){
     .side-panel{display:none!important;}
     .mobile-stats{display:flex!important;}
-    .square{width:10vw!important;height:10vw!important;font-size:6vw!important;}
-    #chess-board{grid-template-columns:repeat(8,10vw)!important;}
-    .coord-label{width:8px!important;font-size:9px!important;}
-    .col-label{width:10vw!important;font-size:9px!important;}
+    .square{width:calc((100vw - 40px) / 8)!important;height:calc((100vw - 40px) / 8)!important;font-size:calc((100vw - 40px) / 12)!important;}
+    #chess-board{grid-template-columns:repeat(8, calc((100vw - 40px) / 8))!important;}
+    .coord-label{width:8px!important;font-size:8px!important;}
+    .col-label{width:calc((100vw - 40px) / 8)!important;font-size:8px!important;}
     .board-col-labels{padding-left:8px!important;}
-    .board-frame{padding:2px!important;}
-    .board-wrapper{width:100vw;align-items:center;overflow:hidden;}
-    .game-layout{gap:4px!important;}
+    .board-frame{padding:2px!important;width:calc(100vw - 16px)!important;box-sizing:border-box!important;}
+    .board-wrapper{width:100vw;align-items:center;}
+    .game-layout{gap:2px!important;}
   }
 </style>
 </head>
