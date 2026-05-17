@@ -1282,9 +1282,14 @@ function renderBoard(){
   const sqPx = sqSize + 'px';
   const fontSize = isMobile ? Math.floor(sqSize * 0.65) + 'px' : '30px';
 
+  // Flip board for black player in online mode
+  const flipped = (gameMode === 'online' && onlineColor === 'black');
+  const letters = flipped
+    ? ['h','g','f','e','d','c','b','a']
+    : ['a','b','c','d','e','f','g','h'];
+
   const container=document.getElementById('board-coords');container.innerHTML='';
   const colLabels=document.getElementById('col-labels');colLabels.innerHTML='';
-  const letters=['a','b','c','d','e','f','g','h'];
   const sq0=document.createElement('div');sq0.style.width='8px';colLabels.appendChild(sq0);
   letters.forEach(l=>{const lbl=document.createElement('div');lbl.className='col-label';lbl.textContent=l;lbl.style.width=sqPx;lbl.style.textAlign='center';colLabels.appendChild(lbl);});
   const boardEl=document.createElement('div');boardEl.id='chess-board';
@@ -1292,7 +1297,12 @@ function renderBoard(){
   boardEl.style.gridTemplateColumns=`repeat(8,${sqPx})`;
   boardEl.style.border='2px solid #5a3a00';
   const validSet=new Set(validMoves.map(m=>m.r*8+m.c));
-  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+
+  // Row and col order based on flip
+  const rows = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+  const cols = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+
+  for(const r of rows) for(const c of cols){
     const sq=document.createElement('div');
     sq.className='square '+((r+c)%2===0?'light':'dark');
     sq.style.width=sqPx;
@@ -1309,7 +1319,6 @@ function renderBoard(){
     if(piece){
       const span=document.createElement('span');
       span.className='piece';
-      // Classic theme: white pieces = white, black pieces = dark
       if(classicTheme){
         if(cl(piece)==='w'){
           span.style.color='#FFFFFF';
@@ -1330,7 +1339,12 @@ function renderBoard(){
   }
   const wrapper=document.createElement('div');wrapper.style.display='flex';
   const labelsCol=document.createElement('div');labelsCol.style.display='flex';labelsCol.style.flexDirection='column';
-  for(let r=0;r<8;r++){const lbl=document.createElement('div');lbl.className='coord-label';lbl.textContent=8-r;lbl.style.height=sqPx;lbl.style.width='8px';labelsCol.appendChild(lbl);}
+  // Row labels also flipped
+  for(const r of rows){
+    const lbl=document.createElement('div');lbl.className='coord-label';
+    lbl.textContent=8-r;lbl.style.height=sqPx;lbl.style.width='8px';
+    labelsCol.appendChild(lbl);
+  }
   wrapper.appendChild(labelsCol);wrapper.appendChild(boardEl);container.appendChild(wrapper);
 }
 
