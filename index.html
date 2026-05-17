@@ -640,7 +640,7 @@
         <button class="arcade-btn red-btn" onclick="undoMove()">◄ UNDO</button>
         <button class="arcade-btn green-btn" id="game-music-btn" onclick="toggleMusic()">🔊 SOM</button>
         <button class="arcade-btn" id="theme-btn" onclick="toggleTheme()">♟ CLÁSSICO</button>
-        <button class="arcade-btn purple-btn" onclick="showScreen('menu')">⌂ MENU</button>
+        <button class="arcade-btn purple-btn" onclick="if(gameMode==='online'){disconnectOnline();}showScreen('menu')">⌂ MENU</button>
       </div>
 
       <!-- TIPS FEED (only in AI mode) -->
@@ -688,7 +688,7 @@
   <div class="overlay-sub" id="overlay-sub">PRESS START</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
     <button class="menu-btn yellow" style="width:auto;font-size:8px;padding:10px 20px" onclick="document.getElementById('overlay').classList.remove('active');if(gameMode==='online'){disconnectOnline();showScreen('menu');}else{resetGame();}">▶ PLAY AGAIN</button>
-    <button class="menu-btn" style="width:auto;font-size:8px;padding:10px 20px" onclick="document.getElementById('overlay').classList.remove('active');showScreen('menu')">⌂ MENU</button>
+    <button class="menu-btn" style="width:auto;font-size:8px;padding:10px 20px" onclick="document.getElementById('overlay').classList.remove('active');if(gameMode==='online'){disconnectOnline();}showScreen('menu')">⌂ MENU</button>
   </div>
 </div>
 
@@ -758,6 +758,7 @@ function showScreen(name){
   if(name!=='game'){
     stopTimer();
     if(name==='menu'){
+      if(gameMode==='online') disconnectOnline();
       gameMode='pvp';
       aiThinking=false;
       board=makeInitialBoard();
